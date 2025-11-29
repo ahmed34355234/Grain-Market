@@ -1,0 +1,27 @@
+body {
+	margin: 0;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
+		'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans',
+		'Helvetica Neue', sans-serif;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+code {
+	font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+		monospace;
+}
+
+.transition-menu {
+	background-image: url(/picture/Grain.avif);
+	background-position: center; /* Centers the image */
+	background-repeat: no-repeat; /* Prevents tiling */
+	background-attachment: fixed; /* Keeps image fixed when scrolling */
+	background-size: cover; /* Makes the image cover the whole screen */
+}
+
+/* .sidebar {
+	background-image: url(/picture/Grain.avif);
+	background-position: center;
+	object-fit: contain;
+} */

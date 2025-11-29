@@ -1,0 +1,111 @@
+/* src/index.css (optional for custom styles) */
+body {
+	margin: 0;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
+		'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans',
+		'Helvetica Neue', sans-serif;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.bg-purple {
+	background-color: #a67bff;
+}
+/* Toast container fixed at top-right */
+.toast-container {
+	position: fixed;
+	top: 20px;
+	right: 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	z-index: 9999;
+}
+
+/* Toast style */
+.floating-toast {
+	background-color: #28a745;
+	color: white;
+	padding: 10px 20px;
+	border-radius: 5px;
+	margin-bottom: 10px;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+	animation: slideIn 0.5s ease-out, fadeOut 0.5s ease-in 4.5s;
+}
+
+@keyframes slideIn {
+	from {
+		transform: translateX(100%);
+		opacity: 0;
+	}
+	to {
+		transform: translateX(0);
+		opacity: 1;
+	}
+}
+
+@keyframes fadeOut {
+	from {
+		transform: translateX(0);
+		opacity: 1;
+	}
+	to {
+		transform: translateX(100%);
+		opacity: 0;
+	}
+}
+
+/* Fade out */
+@keyframes fadeOut {
+	from {
+		opacity: 1;
+	}
+	to {
+		opacity: 0;
+	}
+}
+
+/*login*/
+card {
+	border-radius: 10px;
+	border: none;
+}
+
+.btn-primary {
+	background-color: #007bff;
+	border: none;
+	transition: background-color 0.3s;
+}
+
+.btn-primary:hover {
+	background-color: #0056b3;
+}
+
+.btn-link {
+	color: #007bff;
+	text-decoration: none;
+}
+
+.btn-link:hover {
+	text-decoration: underline;
+}
+
+.alert {
+	font-size: 0.9rem;
+	padding: 0.5rem;
+}
+/* transition for sidebar*/
+
+.transition-menu {
+	transform: translateX(100%); /* start hidden right */
+	animation: slideIn 0.3s forwards ease-in-out;
+}
+
+@keyframes slideIn {
+	from {
+		transform: translateX(100%);
+	}
+	to {
+		transform: translateX(0);
+	}
+}
