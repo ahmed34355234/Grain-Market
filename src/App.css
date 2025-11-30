@@ -6,6 +6,9 @@ body {
 		'Helvetica Neue', sans-serif;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+	direction: ltr;
+text-align: left;
+
 }
 
 .bg-purple {
