@@ -37,7 +37,7 @@ const Roznamcha = () => {
 		const savedWarehouses = localStorage.getItem('warehouses')
 		return savedWarehouses
 			? JSON.parse(savedWarehouses)
-			: ['Number 1', 'Number 2', 'Number 3']
+			: []
 	})
 	const [selectedWarehouse, setSelectedWarehouse] = useState('')
 	const [newWarehouse, setNewWarehouse] = useState('')
