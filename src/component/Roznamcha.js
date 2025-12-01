@@ -103,67 +103,23 @@ const Roznamcha = () => {
 	// ✅ Fetch Items (with offline support)
 
 	useEffect(() => {
-		const fetchItems = async () => {
+		const fetchItems = () => {
 			const currentUserData = localStorage.getItem('currentUser')
+			const user = currentUserData ? JSON.parse(currentUserData) : null
 
-			// اگر user لاگ آؤٹ ہے
-			if (!currentUserData) {
+			if (!user?.id) {
 				setItems([])
-				localStorage.removeItem('items')
 				return
 			}
 
-			const userdata = JSON.parse(currentUserData)
-			const userId = userdata?.id
-
-			if (!userId) {
-				setItems([])
-				localStorage.removeItem('items')
-				return
-			}
-
-			// localStorage سے پہلے دکھاؤ (optimistic UI)
+			// Load all items from localStorage
 			const stored = JSON.parse(localStorage.getItem('items')) || []
 
-			// ✅ Filter only current user's items (localStorage fix)
-			const filteredStored = stored.filter((i) => i.user_id === userId)
-			setItems(filteredStored.map((i) => i.name || i))
+			// Filter only current user's items
+			const filtered = stored.filter((i) => i.user_id === user.id)
 
-			try {
-				// ✅ API سے user-specific items
-				const apiData = await getData(`item/my?userId=${userId}`)
-
-				// ✅ Backend se sirf current user ke items hi rakho (extra safety)
-				const filteredApiData = Array.isArray(apiData)
-					? apiData.filter((i) => i.user_id === userId)
-					: []
-
-				if (filteredApiData.length > 0) {
-					const normalized = filteredApiData.map((i) =>
-						typeof i === 'object' ? i.name : i
-					)
-
-					// ✅ Store per-user items in localStorage
-					const newItems = filteredApiData.map((i) => ({
-						name: i.name || i,
-						user_id: userId,
-					}))
-
-					setItems(normalized)
-					localStorage.setItem('items', JSON.stringify(newItems))
-					console.log('Items from API (User-Specific):', normalized)
-				} else {
-					setItems([])
-					localStorage.removeItem('items')
-				}
-			} catch (error) {
-				console.warn(
-					'API failed, using LocalStorage:',
-					stored.length,
-					'items'
-				)
-				setItems(filteredStored.map((i) => i.name || i)) // آف لائن: صرف اپنے items دکھاؤ
-			}
+			// Set UI (only name)
+			setItems(filtered.map((i) => i.name || i))
 		}
 
 		fetchItems()
@@ -172,78 +128,21 @@ const Roznamcha = () => {
 	// ✅ Fetch Warehouses (with offline support)
 	// ✅ Warehouses: LocalStorage + /getwearHouse
 	useEffect(() => {
-		const fetchWarehouses = async () => {
+		const fetchWarehouses = () => {
 			const currentUserData = localStorage.getItem('currentUser')
+			const user = currentUserData ? JSON.parse(currentUserData) : null
 
-			// اگر user لاگ آؤٹ ہے
-			if (!currentUserData) {
+			if (!user?.id) {
 				setWarehouses([])
-				localStorage.removeItem('warehouses')
 				return
 			}
 
-			const userdata = JSON.parse(currentUserData)
-			const userId = userdata?.id
-
-			if (!userId) {
-				setWarehouses([])
-				localStorage.removeItem('warehouses')
-				return
-			}
-
-			// localStorage سے پہلے دکھاؤ (optimistic)
+			// LocalStorage se warehouses load karo
 			const stored = JSON.parse(localStorage.getItem('warehouses')) || []
-
-			// ✅ صرف current user کے warehouses filter کرو
-			const filteredStored = stored.filter((w) => w.user_id === userId)
-			setWarehouses(filteredStored.map((w) => w.name || w))
-
-			try {
-				// API سے user-specific warehouses
-				const apiData = await getData(`/warehouse/my?userId=${userId}`)
-
-				// ✅ اگر backend غلطی سے سب بھیج دے تو frontend پہ بھی filter lagao
-				const filteredApiData = Array.isArray(apiData)
-					? apiData.filter((w) => w.user_id === userId)
-					: []
-
-				if (filteredApiData.length > 0) {
-					const normalized = filteredApiData.map((w) =>
-						typeof w === 'object' ? w.name : w
-					)
-
-					// ✅ localStorage میں صرف current user کے warehouses save کرو
-					const newWarehouses = filteredApiData.map((w) => ({
-						name: w.name || w,
-						user_id: userId,
-					}))
-
-					setWarehouses(normalized)
-					localStorage.setItem(
-						'warehouses',
-						JSON.stringify(newWarehouses)
-					)
-					console.log(
-						'Warehouses from API (User-Specific):',
-						normalized
-					)
-				} else {
-					setWarehouses([])
-					localStorage.removeItem('warehouses')
-				}
-			} catch (error) {
-				console.warn(
-					'API failed, using LocalStorage:',
-					stored.length,
-					'warehouses'
-				)
-				// آف لائن: صرف current user کے warehouses دکھاؤ
-				setWarehouses(filteredStored.map((w) => w.name || w))
-			}
 		}
 
 		fetchWarehouses()
-	}, [localStorage.getItem('currentUser')])
+	}, ['currentUser'])
 
 	//getallhistryroznamcha function
 	useEffect(() => {
@@ -268,8 +167,6 @@ const Roznamcha = () => {
 			console.log('Invalid user data → transactions cleared')
 			return
 		}
-
-		console.log('Fetching transactions for user:', userId)
 
 		try {
 			// API سے user-specific transactions
@@ -347,9 +244,9 @@ const Roznamcha = () => {
 
 		try {
 			const balance = await Addtransactions.getOpeningBalance(userId)
-			const newBalance = balance.data?.openingBalance || 0
 
-			console.log('Balance fetched:', newBalance)
+			const newBalance = balance.data?.opening_balance || 0
+
 			setOpeningBalance(newBalance)
 			localStorage.setItem('openingBalance', newBalance.toString())
 		} catch (error) {
@@ -372,21 +269,21 @@ const Roznamcha = () => {
 
 		const userdata = JSON.parse(currentUserData)
 
-		// ✅ Get user's saved items (filter per user)
+		// Get all stored items
 		const storedItems = JSON.parse(localStorage.getItem('items')) || []
-		const userSpecificItems = storedItems.filter(
-			(i) => i.user_id === userdata.id
-		)
 
-		// ✅ Check if same user already added this item
-		if (userSpecificItems.some((i) => i.name === trimmedItem)) {
+		// Only this user's items
+		const userItems = storedItems.filter((i) => i.user_id === userdata.id)
+
+		// Check duplicate
+		if (userItems.some((i) => i.name === trimmedItem)) {
 			return showFloatingError('Item already exists!')
 		}
 
 		try {
 			const result = await postData('/additem', {
 				name: trimmedItem,
-				user_id: userdata.id,
+				userId: userdata.id,
 			})
 
 			const newItemObj = {
@@ -394,25 +291,38 @@ const Roznamcha = () => {
 				user_id: userdata.id,
 			}
 
-			// ✅ Save only this user's items separately
-			const updated = [...userSpecificItems, newItemObj]
+			// Updated items of current user
+			const updatedUserItems = [...userItems, newItemObj]
 
-			// Merge back with other users’ items (if any in localStorage)
-			const allItems = storedItems.filter(
+			// Keep other users' items safe
+			const otherUsersItems = storedItems.filter(
 				(i) => i.user_id !== userdata.id
 			)
-			const finalItems = [...allItems, ...updated]
+
+			// Final localStorage data
+			const finalItems = [...otherUsersItems, ...updatedUserItems]
 
 			localStorage.setItem('items', JSON.stringify(finalItems))
-			setItems(updated.map((i) => i.name)) // set only current user's names
-			setItem(newItemObj.name)
+
+			// UI me sirf current user
+			setItems(updatedUserItems.map((i) => i.name))
 			setNewItem('')
-			showFloatingError('Item added!')
+			showFloatingError('Item added successfully!')
 		} catch (error) {
 			showFloatingError('Failed to add item. Check internet.')
 		}
 	}
 
+	const getItemall = async () => {
+		const currentUserData = localStorage.getItem('currentUser')
+		if (!currentUserData) {
+			return showFloatingError('Please login to add item!')
+		}
+
+		const userdata = JSON.parse(currentUserData)
+		let allitems = await Addtransactions.getTransactionItems(userdata.id)
+		return allitems.items
+	}
 	// Handle adding a new warehouse
 	const handleAddNewWarehouse = async () => {
 		const trimmedWarehouse = newWarehouse.trim()
