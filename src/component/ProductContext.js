@@ -5,20 +5,38 @@ export const ProductContext = createContext()
 export const ProductProvider = ({ children }) => {
 	const BORISIZE = 100 // 1 bori = 100 kg
 
-	// Load from localStorage or default
+
 	const [products, setProducts] = useState(() => {
-		const saved = localStorage.getItem('products')
-		return saved ? JSON.parse(saved) : []
+		try {
+			const saved = localStorage.getItem('products')
+			if (!saved || saved === 'undefined' || saved === 'null') return []
+			return JSON.parse(saved) || []
+		} catch (err) {
+			console.error('Failed to parse products:', err)
+			return []
+		}
 	})
 
 	const [inventory, setInventory] = useState(() => {
-		const saved = localStorage.getItem('inventory')
-		return saved ? JSON.parse(saved) : []
+		try {
+			const saved = localStorage.getItem('inventory')
+			if (!saved || saved === 'undefined' || saved === 'null') return []
+			return JSON.parse(saved) || []
+		} catch (err) {
+			console.error('Failed to parse inventory:', err)
+			return []
+		}
 	})
 
 	const [khatas, setKhatas] = useState(() => {
-		const saved = localStorage.getItem('khatas')
-		return saved ? JSON.parse(saved) : []
+		try {
+			const saved = localStorage.getItem('khatas')
+			if (!saved || saved === 'undefined' || saved === 'null') return []
+			return JSON.parse(saved) || []
+		} catch (err) {
+			console.error('Failed to parse khatas:', err)
+			return []
+		}
 	})
 
 	// Sync to localStorage whenever state changes
@@ -34,6 +52,9 @@ export const ProductProvider = ({ children }) => {
 		localStorage.setItem('khatas', JSON.stringify(khatas))
 	}, [khatas])
 
+	{
+		/**
+	
 	useEffect(() => {
 		const user = localStorage.getItem('currentUser')
 		const userId = user ? JSON.parse(user).id : null
@@ -50,7 +71,8 @@ export const ProductProvider = ({ children }) => {
 		} else {
 			setKhatas([])
 		}
-	}, [localStorage.getItem('currentUser')])
+	}, [localStorage.getItem('currentUser')]) */
+	}
 	// ----------------- Roznamcha / Inventory functions -----------------
 	const addProduct = (product) => {
 		const newProducts = [...products, product]
