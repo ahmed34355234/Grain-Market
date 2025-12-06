@@ -16,13 +16,24 @@ const Login = () => {
 	const [toasts, setToasts] = useState([])
 	const navigate = useNavigate()
 	const [currentUser, setCurrentUser] = useState(() => {
-		return JSON.parse(localStorage.getItem('currentUser'))
+		const saved = localStorage.getItem('currentUser')
+		try {
+			return saved ? JSON.parse(saved) : null
+		} catch {
+			return null
+		}
 	})
 
 	useEffect(() => {
 		function handleStorageChange(event) {
 			if (event.key === 'currentUser') {
-				setCurrentUser(JSON.parse(event.newValue))
+				try {
+					setCurrentUser(
+						event.newValue ? JSON.parse(event.newValue) : null
+					)
+				} catch {
+					setCurrentUser(null)
+				}
 			}
 		}
 		window.addEventListener('storage', handleStorageChange)
@@ -45,9 +56,11 @@ const Login = () => {
 		setSuccess('')
 
 		try {
+			// ------------------------
 			// FORGOT PASSWORD FLOW
+			// ------------------------
 			if (isForgot) {
-				// Step 1: send reset code
+				// Step 1: Send reset code
 				if (!code) {
 					const response = await axios.post(
 						`${apiUrl}/forgot-password`,
@@ -55,18 +68,24 @@ const Login = () => {
 							email,
 						}
 					)
+
 					setSuccess(response.data.msg)
 					showToast('Reset code sent to your email.')
 				} else {
-					// Step 2: verify code & login
+					// Step 2: Verify code & login
 					const response = await axios.post(`${apiUrl}/verify-code`, {
 						email,
 						code,
 					})
+
+					// Verify response
+					if (!response.data.token || !response.data.user) {
+						setError('Invalid verification code!')
+						return
+					}
+
 					const { token, user } = response.data
 
-					localStorage.setItem('token', token)
-					localStorage.setItem('currentUser', JSON.stringify(user))
 					localStorage.setItem('userId', user.id)
 					localStorage.setItem('userName', user.name)
 
@@ -75,14 +94,22 @@ const Login = () => {
 				}
 			}
 
+			// ------------------------
 			// LOGIN FLOW
+			// ------------------------
 			else if (isLogin) {
 				const response = await axios.post(`${apiUrl}/login`, {
 					email,
 					password,
 				})
-				console.log(response)
 
+				// Wrong credentials → DO NOT SAVE ANYTHING
+				if (response.data?.msg === 'Invalid credentials') {
+					setError('Invalid Email or Password!')
+					return
+				}
+
+				// Safe data
 				const { token, user } = response.data
 
 				localStorage.setItem('token', token)
@@ -97,7 +124,9 @@ const Login = () => {
 				setTimeout(() => navigate('/'), 1000)
 			}
 
+			// ------------------------
 			// SIGNUP FLOW
+			// ------------------------
 			else {
 				const response = await axios.post(`${apiUrl}/register`, {
 					name,
@@ -118,9 +147,9 @@ const Login = () => {
 				setPassword('')
 			}
 		} catch (err) {
-			// FIXED: show friendly message
+			// GLOBAL ERROR HANDLER
 			if (isLogin) {
-				setError('Email or Password does not match.')
+				setError('Invalid Email or Password!')
 			} else {
 				setError(err.response?.data?.msg || 'Something went wrong.')
 			}
