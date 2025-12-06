@@ -58,6 +58,16 @@ const Addtransactions = {
 			)
 		}
 	},
+	getTransactionwearhouses: async (userId) => {
+		try {
+			const response = await api.get(`/warehouse/my?userId=${userId}`)
+			return response.data
+		} catch (error) {
+			throw new Error(
+				error.response?.data?.message || 'Failed to fetch wearhouse'
+			)
+		}
+	},
 
 	getOpeningBalance: async (userId) => {
 		try {
