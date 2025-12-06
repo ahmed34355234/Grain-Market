@@ -18,7 +18,7 @@ const Sidebar = () => {
         <>
             {/* Sidebar for large screens */ }
             <div className="bg-success text-white vh-100 p-3 d-none d-lg-block  sidebar" style={ { width: '250px', position: "sticky", top: "0" } }>
-                <h2 className="mb-4">Ghalla Mandi Management</h2>
+                <h2 className="mb-4">Zrai~trade</h2>
                 <ul className="nav flex-column fw-semibold">
                     <li className="nav-item ">
                         <NavLink className="nav-link text-white d-flex align-items-center" to="/" onClick={ () => setIsOpen(false) }>
@@ -50,7 +50,7 @@ const Sidebar = () => {
             {/* Header for small screens */ }
             <header className="bg-success text-white p-3 d-lg-none d-block fixed-top mb-5">
                 <div className="d-flex justify-content-between align-items-center fw-bold ">
-                    <h2 className="m-0">Ghalla Mandi Management</h2>
+                    <h2 className="m-0">Zrai~trade</h2>
                     <button
                         className="btn btn-secondary"
                         onClick={ () => setIsOpen(!isOpen) }
