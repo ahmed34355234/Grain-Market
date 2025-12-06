@@ -136,7 +136,7 @@ const Roznamcha = () => {
 			}
 
 			try {
-				const response = await Addtransactions.getTransactionwearhouse(
+			const response = await Addtransactions.getTransactionwearhouses(
 					user.id
 				)
 
