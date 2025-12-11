@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { Online, Offline } from 'react-detect-offline'
 import { Addtransactions } from '../service'
 import { getData, postData } from '../dynmicSevice'
+import { data } from 'react-router-dom'
 
 const Roznamcha = () => {
 	const context = useContext(ProductContext)
@@ -19,6 +20,10 @@ const Roznamcha = () => {
 	const [items, setItems] = useState([])
 	const [name, setName] = useState('')
 	const [date, setDate] = useState('')
+	{
+		/** new functions addedd on sunday 7 dec 2025 */
+	}
+	const [totalCutKg, setTotalCutKg] = useState('')
 
 	const [item, setItem] = useState([])
 	const [newItem, setNewItem] = useState('')
@@ -136,7 +141,7 @@ const Roznamcha = () => {
 			}
 
 			try {
-			const response = await Addtransactions.getTransactionwearhouses(
+				const response = await Addtransactions.getTransactionwearhouses(
 					user.id
 				)
 
@@ -436,27 +441,41 @@ const Roznamcha = () => {
 			return showFloatingError('Warehouse is required!')
 
 		const BORISIZE = 100
-		let qtyKg, qtyBori
-		if (unit === 'kg') {
-			qtyKg = parseFloat(quantity)
-			qtyBori = qtyKg / BORISIZE
-		} else {
-			qtyBori = parseFloat(quantity)
-			qtyKg = qtyBori * BORISIZE
-		}
-		const total = parseFloat(rate) * parseFloat(quantity)
+
+		// اصل مقدار (بغیر کٹائی)
+		let originalQtyKg =
+			unit === 'kg'
+				? parseFloat(quantity)
+				: parseFloat(quantity) * BORISIZE
+		let originalQtyBori = originalQtyKg / BORISIZE
+
+		// کٹائی
+		const cutKg = parseFloat(totalCutKg) || 0
+		if (cutKg < 0) return showFloatingError('Cut cannot be negative!')
+		if (cutKg > originalQtyKg)
+			return showFloatingError(
+				`Cut cannot exceed total quantity (${originalQtyKg} kg)!`
+			)
+
+		// فائنل مقدار (کٹائی کے بعد)
+		const finalQtyKg = originalQtyKg - cutKg
+		const finalQtyBori = finalQtyKg / BORISIZE
+
+		// Total اب فائنل بوری سے حساب ہوگا (rate بوری کا ہے)
+		const total = parseFloat(rate) * finalQtyBori
 
 		const newEntry = {
 			id: uuidv4(),
 			item,
 			person,
 			rate: parseFloat(rate),
-			quantity: parseFloat(quantity),
+			quantity: parseFloat(quantity), // اصل مقدار
 			unit,
-			quantityKg: qtyKg,
-			quantityBori: qtyBori,
+			quantityKg: finalQtyKg, // فائنل kg (کٹائی کے بعد)
+			quantityBori: parseFloat(finalQtyBori.toFixed(4)),
+			cutKg: cutKg, // کتنا کٹا
 			contact,
-			total,
+			total: parseFloat(total.toFixed(2)),
 			transactionType,
 			date: getRoznamchaDate(),
 			warehouse: selectedWarehouse,
@@ -464,20 +483,20 @@ const Roznamcha = () => {
 			user_id: userdata.id,
 		}
 
-		addProduct(newEntry) // Local context update
+		addProduct(newEntry)
 
-		// Step 3: API کے لیے data
 		const apiData = {
 			personName: person,
 			product: item,
-			quantityBori: qtyBori,
-			quantityKg: qtyKg,
+			quantityBori: finalQtyBori,
+			quantityKg: finalQtyKg,
 			pricePerBori: parseFloat(rate),
 			transactionType: transactionType,
 			contact: contact,
 			warehouse: selectedWarehouse,
 			date: new Date().toISOString().split('T')[0],
 			user_id: userdata.id,
+			cutKg: cutKg, // سرور کو بھی بھیجیں
 		}
 
 		console.log('SENDING TO API:', apiData)
@@ -485,16 +504,14 @@ const Roznamcha = () => {
 		try {
 			await Addtransactions.addTransaction(apiData)
 			showFloatingError('Transaction Added Successfully!')
-
-			// Refresh history
 			await getallhistryroznamcha()
 		} catch (error) {
 			console.error('API Error:', error)
 			showFloatingError('Failed to add transaction!')
-			return // آگے نہ جاؤ
+			return
 		}
 
-		// Step 5: Balance update
+		// Balance update (total فائنل بوری سے ہے)
 		if (transactionType === 'purchase') {
 			const newBalance = parseFloat(openingBalance) - total
 			setOpeningBalance(newBalance)
@@ -515,7 +532,7 @@ const Roznamcha = () => {
 			).catch((err) => console.error('Balance update error:', err))
 		}
 
-		// Step 6: Reset form
+		// Reset form
 		setItem('')
 		setPerson('')
 		setRate('')
@@ -524,6 +541,7 @@ const Roznamcha = () => {
 		setContact('')
 		setTransactionType('purchase')
 		setSelectedWarehouse('')
+		setTotalCutKg('') // کٹائی بھی صاف کریں
 	}
 
 	const handleAddBalance = async () => {
@@ -685,7 +703,7 @@ const Roznamcha = () => {
 			</Card>
 
 			{/* Add Transaction Form */}
-			<Card className='shadow border-0 mb-5'>
+			<Card className='shadow border-0 mb-5 '>
 				<div className='card-body p-4'>
 					<h4 className='card-title mb-4 fw-semibold'>
 						Add Transaction
@@ -804,6 +822,32 @@ const Roznamcha = () => {
 							</div>
 						</div>
 
+						{/** kat system by kg */}
+
+						<div className='col-md-3'>
+							<label className='form-label fw-bold '>
+								Total{' '}
+								<small className='text-muted'>کٹائی</small>
+								(kg)
+							</label>
+							<input
+								type='number'
+								step='0.1'
+								min='0'
+								className='form-control '
+								placeholder='مثلاً 10'
+								value={totalCutKg}
+								onChange={(e) => setTotalCutKg(e.target.value)}
+							/>
+							{totalCutKg && parseFloat(totalCutKg) > 0 && (
+								<small className='text-danger'>
+									کٹائی:{' '}
+									{(parseFloat(totalCutKg) / 100).toFixed(2)}{' '}
+									بوری
+								</small>
+							)}
+						</div>
+
 						<div className='col-md-3'>
 							<label className='form-label fw-bold'>
 								Contact No
@@ -858,7 +902,7 @@ const Roznamcha = () => {
 							)}
 						</div>
 
-						<div className='col-md-3 d-flex align-items-end'>
+						<div className='col-md-3 d-flex justify-content-center align-items-center'>
 							<Button
 								className='w-100'
 								variant='success'
