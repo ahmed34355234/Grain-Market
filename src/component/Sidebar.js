@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { FaBars, { FaStar } from 'react-icons/fa';
+import { FaBars, FaStar } from 'react-icons/fa'; // Fixed nested import syntax
 import { BiGridAlt } from 'react-icons/bi';
 import {
   FiBook,
@@ -9,19 +9,17 @@ import {
   FiList,
   FiBarChart2,
   FiLogIn,
-  FiHeart   // ← Yeh bhool gaye the, ab add kiya
+  FiHeart
 } from 'react-icons/fi';
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [rating, setRating] = useState(0);
   const [hovered, setHovered] = useState(0);
-
   const handleRating = (value) => {
     setRating(value);
     alert(`Thanks For Rating ${value} stars With Us`);
   };
-
   const RatingSection = () => (
     <div className="text-center border-top border-light pt-4 mt-auto">
       <p className="mb-3 fw-bold small">Rate Us</p>
@@ -42,7 +40,6 @@ const Sidebar = () => {
           />
         ))}
       </div>
-
       <a href="mailto:ab1338484@gmail.com" className="btn btn-outline-light btn-sm w-100 mb-2">
         Contact Developer
       </a>
@@ -51,7 +48,6 @@ const Sidebar = () => {
       </p>
     </div>
   );
-
   return (
     <>
       {/* Sidebar for large screens */}
@@ -121,13 +117,11 @@ const Sidebar = () => {
             </NavLink>
           </li>
         </ul>
-
         {/* Rating section desktop */}
         <div className="p-4 border-top border-light">
           <RatingSection />
         </div>
-      </div> {/* ← Yeh band karna bhool gaye the! */}
-
+      </div>
       {/* Header for small screens */}
       <header className='bg-success text-white p-3 d-lg-none d-block fixed-top mb-5'>
         <div className='d-flex justify-content-between align-items-center fw-bold'>
@@ -139,7 +133,6 @@ const Sidebar = () => {
           </button>
         </div>
       </header>
-
       {/* Menu for small screens */}
       {isOpen && (
         <div
@@ -148,7 +141,7 @@ const Sidebar = () => {
             zIndex: 1000,
             top: '4rem',
             right: 0,
-            width: '100%', // window.innerWidth hataya kyunki render mein issue deta hai
+            width: '100%',
             height: 'calc(100vh - 4rem)',
             overflowY: 'auto'
           }}
@@ -190,7 +183,6 @@ const Sidebar = () => {
               </NavLink>
             </li>
           </ul>
-
           <div className="border-top border-light pt-4 px-4">
             <RatingSection />
           </div>
