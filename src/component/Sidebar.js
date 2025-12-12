@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
+import { FaBars, FaStar } from 'react-icons/fa';
 import { FaBars } from 'react-icons/fa';
 import { BiGridAlt } from "react-icons/bi";
 
@@ -11,8 +12,15 @@ import { FiBook, FiBox, FiFolder, FiList, FiBarChart2, FiLogIn } from "react-ico
 
 const Sidebar = () => {
     const [isOpen, setIsOpen] = useState(false);
+    const [rating, setRating] = useState(0);
+    const [hovered, setHovered] = useState(0);
 
-
+const handleRating = (value) => {
+        setRating(value);
+        // Optional: Send rating to backend
+        // axios.post('/api/rating', { rating: value })
+        alert(`Thanks for rating us ${value} stars!`);
+    };
 
     return (
         <>
@@ -46,6 +54,36 @@ const Sidebar = () => {
                     </li>
                 </ul>
             </div>
+
+
+{/* Bottom Rating + Contact Section */}
+                <div className="text-center border-top border-light pt-4">
+                    <p className="mb-2 fw-bold">Rate Our App</p>
+                    <div className="d-flex justify-content-center gap-2 mb-3">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                            <FaStar
+                                key={star}
+                                size={28}
+                                className="cursor-pointer transition"
+                                color={(hovered || rating) >= star ? "#FFD700" : "#fff"}
+                                style={{ filter: (hovered || rating) >= star ? "drop-shadow(0 0 8px gold)" : "" }}
+                                onMouseEnter={() => setHovered(star)}
+                                onMouseLeave={() => setHovered(0)}
+                                onClick={() => handleRating(star)}
+                            />
+                        ))}
+                    </div>
+                    <p className="small mb-2 opacity-75">Love using Zrai~trade? Give us 5 stars!</p>
+                    <a href="mailto:ab1338484@gmail.com" className="btn btn-sm btn-outline-light w-100 d-flex align-items-center justify-content-center gap-2">
+                        <FiMail /> Contact Us
+                    </a>
+                    <p className="mt-3 small opacity-50">
+                        Made with <FiHeart className="text-danger inline" /> in Pakistan
+                    </p>
+                </div>
+            </div>
+
+
 
             {/* Header for small screens */ }
             <header className="bg-success text-white p-3 d-lg-none d-block fixed-top mb-5">
